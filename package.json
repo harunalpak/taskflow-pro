@@ -1,0 +1,27 @@
+{
+  "name": "taskflow-pro",
+  "version": "1.0.0",
+  "description": "TaskFlow Pro - Production-like task management platform",
+  "private": true,
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
+  "scripts": {
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev:worker": "cd backend && npm run worker",
+    "test:backend": "cd backend && npm test",
+    "install:all": "npm install && cd backend && npm install && cd ../frontend && npm install"
+  },
+  "keywords": [
+    "task-management",
+    "nodejs",
+    "express",
+    "react",
+    "typescript"
+  ],
+  "author": "",
+  "license": "MIT"
+}
+
