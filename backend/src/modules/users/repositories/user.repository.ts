@@ -19,13 +19,6 @@ export class UserRepository {
     return prisma.user.findMany({
       skip,
       take,
-      select: {
-        id: true,
-        email: true,
-        name: true,
-        avatarUrl: true,
-        createdAt: true,
-      },
     });
   }
 }

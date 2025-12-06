@@ -12,7 +12,7 @@ import { ReportModule } from './modules/reports/report.module';
 import logger from './common/logger';
 import { asyncHandler } from './common/async-handler';
 
-export function createApp() {
+export function createApp(): express.Application {
   const app = express();
 
   // Security middleware

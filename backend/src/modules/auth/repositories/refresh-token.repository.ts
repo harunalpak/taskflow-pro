@@ -1,6 +1,14 @@
 import prisma from '../../../infra/db/prisma';
 import { RefreshToken } from '@prisma/client';
 
+export type RefreshTokenWithUser = RefreshToken & {
+  user: {
+    id: string;
+    email: string;
+    name: string;
+  };
+};
+
 export class RefreshTokenRepository {
   async create(data: {
     token: string;
@@ -12,11 +20,20 @@ export class RefreshTokenRepository {
     });
   }
 
-  async findByToken(token: string): Promise<RefreshToken | null> {
-    return prisma.refreshToken.findUnique({
+  async findByToken(token: string): Promise<RefreshTokenWithUser | null> {
+    const result = await prisma.refreshToken.findUnique({
       where: { token },
-      include: { user: true },
+      include: { 
+        user: {
+          select: {
+            id: true,
+            email: true,
+            name: true,
+          },
+        },
+      },
     });
+    return result as RefreshTokenWithUser | null;
   }
 
   async deleteByToken(token: string): Promise<void> {

@@ -16,12 +16,12 @@ export class UserController {
   }
 
   private setupRoutes() {
-    this.router.get('/me', authMiddleware, asyncHandler(this.getProfile.bind(this)));
-    this.router.patch('/me', authMiddleware, asyncHandler(this.updateProfile.bind(this)));
-    this.router.get('/', authMiddleware, asyncHandler(this.listUsers.bind(this)));
+    this.router.get('/me', authMiddleware as any, asyncHandler(this.getProfile.bind(this)) as any);
+    this.router.patch('/me', authMiddleware as any, asyncHandler(this.updateProfile.bind(this)) as any);
+    this.router.get('/', authMiddleware as any, asyncHandler(this.listUsers.bind(this)) as any);
   }
 
-  private async getProfile(req: AuthRequest, res: Response) {
+  private getProfile = async (req: AuthRequest, res: Response) => {
     const user = await this.userService.getProfile(req.userId!);
 
     res.json({
@@ -30,7 +30,7 @@ export class UserController {
     });
   }
 
-  private async updateProfile(req: AuthRequest, res: Response) {
+  private updateProfile = async (req: AuthRequest, res: Response) => {
     const validationResult = updateProfileDto.safeParse(req.body);
     if (!validationResult.success) {
       throw new ValidationError(
@@ -46,7 +46,7 @@ export class UserController {
     });
   }
 
-  private async listUsers(req: AuthRequest, res: Response) {
+  private listUsers = async (req: AuthRequest, res: Response) => {
     const skip = parseInt(req.query.skip as string) || 0;
     const take = parseInt(req.query.take as string) || 10;
 
