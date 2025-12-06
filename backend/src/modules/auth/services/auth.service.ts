@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { config } from '../../../config/env';
 import prisma from '../../../infra/db/prisma';
 import { AuthRepository } from '../repositories/auth.repository';
-import { RefreshTokenRepository } from '../repositories/refresh-token.repository';
+import { RefreshTokenRepository, RefreshTokenWithUser } from '../repositories/refresh-token.repository';
 import { ValidationError, UnauthorizedError, ConflictError } from '../../../common/errors';
 import { RegisterDto, LoginDto } from '../dto/auth.dto';
 
@@ -66,7 +66,7 @@ export class AuthService {
   }
 
   async refreshToken(refreshToken: string) {
-    const tokenRecord = await this.refreshTokenRepository.findByToken(refreshToken);
+    const tokenRecord = await this.refreshTokenRepository.findByToken(refreshToken) as RefreshTokenWithUser | null;
     if (!tokenRecord) {
       throw new UnauthorizedError('Invalid refresh token');
     }
@@ -135,8 +135,9 @@ export class AuthService {
       throw new Error('JWT secret is not configured');
     }
 
+    const expiresIn = (config.jwt.accessExpiresIn || '15m') as string;
     const signOptions: SignOptions = {
-      expiresIn: config.jwt.accessExpiresIn || '15m',
+      expiresIn: expiresIn,
     };
     
     const accessToken = jwt.sign(

@@ -29,10 +29,22 @@ export class AuthController {
         },
         async (accessToken, refreshToken, profile, done) => {
           try {
-            const user = await this.authService.findOrCreateGoogleUser(profile);
+            if (!profile.emails || profile.emails.length === 0) {
+              return done(new Error('No email found in Google profile'), false);
+            }
+            const emails = profile.emails.map(e => ({ 
+              value: e.value, 
+              verified: e.verified 
+            }));
+            const user = await this.authService.findOrCreateGoogleUser({
+              id: profile.id,
+              emails: emails as Array<{ value: string; verified?: boolean }>,
+              displayName: profile.displayName || '',
+              photos: profile.photos?.map(p => ({ value: p.value })),
+            });
             return done(null, user);
           } catch (error) {
-            return done(error, null);
+            return done(error as Error, false);
           }
         }
       )
@@ -47,7 +59,7 @@ export class AuthController {
         // This is simplified - in production, fetch from DB
         done(null, { id });
       } catch (error) {
-        done(error, null);
+        done(error as Error, false);
       }
     });
   }
