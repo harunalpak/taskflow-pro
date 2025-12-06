@@ -1,5 +1,5 @@
 import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
+import jwt, { SignOptions } from 'jsonwebtoken';
 import { v4 as uuidv4 } from 'uuid';
 import { config } from '../../../config/env';
 import prisma from '../../../infra/db/prisma';
@@ -76,8 +76,10 @@ export class AuthService {
       throw new UnauthorizedError('Refresh token expired');
     }
 
-    const user = tokenRecord.user;
-    const tokens = await this.generateTokens(user);
+    if (!tokenRecord.user) {
+      throw new UnauthorizedError('User not found for refresh token');
+    }
+    const tokens = await this.generateTokens(tokenRecord.user);
 
     // Delete old refresh token
     await this.refreshTokenRepository.deleteByToken(refreshToken);
@@ -91,7 +93,7 @@ export class AuthService {
 
   async findOrCreateGoogleUser(profile: {
     id: string;
-    emails: Array<{ value: string }>;
+    emails: Array<{ value: string; verified?: boolean }>;
     displayName: string;
     photos?: Array<{ value: string }>;
   }) {
@@ -127,16 +129,24 @@ export class AuthService {
   }
 
   async generateTokens(user: { id: string; email: string; name: string }) {
+    const secret = config.jwt.secret;
+    
+    if (!secret || typeof secret !== 'string') {
+      throw new Error('JWT secret is not configured');
+    }
+
+    const signOptions: SignOptions = {
+      expiresIn: config.jwt.accessExpiresIn || '15m',
+    };
+    
     const accessToken = jwt.sign(
       {
         userId: user.id,
         email: user.email,
         name: user.name,
       },
-      config.jwt.secret,
-      {
-        expiresIn: config.jwt.accessExpiresIn,
-      }
+      secret as string,
+      signOptions
     );
 
     const refreshToken = uuidv4();

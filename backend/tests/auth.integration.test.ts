@@ -1,12 +1,9 @@
 import request from 'supertest';
+import { Express } from 'express';
 import { createApp } from '../src/app';
 
 describe('Auth Integration Tests', () => {
-  let app: Express.Application;
-
-  beforeAll(() => {
-    app = createApp() as any;
-  });
+  const app = createApp() as unknown as Express;
 
   describe('POST /api/auth/register', () => {
     it('should register a new user', async () => {

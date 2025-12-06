@@ -36,19 +36,25 @@ describe('AuthService', () => {
     });
 
     it('should create a new user and return tokens', async () => {
-      authRepository.findByEmail.mockResolvedValue(null);
-      authRepository.create.mockResolvedValue({
+      const mockUser = {
         id: '1',
         email: 'test@example.com',
         name: 'Test User',
         password: 'hashed',
-      } as any);
+      };
+
+      authRepository.findByEmail.mockResolvedValue(null);
+      authRepository.create.mockResolvedValue(mockUser as any);
       refreshTokenRepository.create.mockResolvedValue({
         id: '1',
         token: 'refresh-token',
         userId: '1',
         expiresAt: new Date(),
       } as any);
+
+      // Mock bcrypt.hash
+      const bcrypt = require('bcryptjs');
+      jest.spyOn(bcrypt, 'hash').mockResolvedValue('hashed-password');
 
       const result = await authService.register({
         email: 'test@example.com',
